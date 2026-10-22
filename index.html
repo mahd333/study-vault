@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Homework Review Tool</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        :root {
+            --bg-primary: #121214;
+            --bg-secondary: #1a1a1e;
+            --accent: #bb86fc;
+            --text-main: #e1e1e6;
+            --text-muted: #a8a8b3;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 80px;
+            background-color: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            border-right: 1px solid #29292e;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 40px;
+        }
+
+        .nav-item {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--bg-primary);
+            background-color: var(--accent);
+            box-shadow: 0 4px 14px rgba(187, 134, 252, 0.4);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .tab-panel {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .tab-panel.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #loader {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(18, 18, 20, 0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #29292e;
+            border-top: 5px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            margin-top: 20px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .search-container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .search-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .search-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        .search-bar-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .search-box-inner {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--bg-secondary);
+            border: 2px solid #29292e;
+            border-radius: 16px;
+            padding: 5px 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box-inner:focus-within {
+            border-color: var(--accent);
+        }
+
+        .search-icon {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 15px 0;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            outline: none;
+        }
+
+        .go-btn {
+            padding: 0 25px;
+            height: 56px;
+            border-radius: 16px;
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(187, 134, 252, 0.2);
+        }
+
+        .go-btn:hover {
+            opacity: 0.9;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 20px;
+        }
+
+        .game-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid #29292e;
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 5px 15px rgba(187, 134, 252, 0.1);
+        }
+
+        .game-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .game-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="nav-item active" onclick="switchTab('search')" title="Web Proxy"><i class="fa-solid fa-globe"></i></div>
+        <div class="nav-item" onclick="switchTab('games')" title="Unblocked Games"><i class="fa-solid fa-gamepad"></i></div>
+    </div>
+
+    <div class="main-content">
+        <div id="loader">
+            <div class="spinner"></div>
+            <div class="loader-text">TUNNELING SECURE CONNECTION...</div>
+        </div>
+
+        <iframe id="proxy-view"></iframe>
+
+        <div id="tab-search" class="tab-panel active">
+            <div class="search-container">
+                <div class="search-title">Study Vault</div>
+                <div class="search-subtitle">Enter an address safely using your private encrypted proxy bypass node.</div>
+                <div class="search-bar-wrapper">
+                    <div class="search-box-inner">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="url-field" class="search-input" placeholder="Search the web freely or type a URL..." onkeydown="if(event.key === 'Enter') launchProxy()">
+                    </div>
+                    <button class="go-btn" onclick="launchProxy()">Go</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-games" class="tab-panel">
+            <h2 style="align-self: flex-start; max-width: 1000px; margin: 0 auto 20px auto; width: 100%;">Arcade Database</h2>
+            <div class="games-grid">
+                <div class="game-card" onclick="launchGame('https://retrobowlgame.com')">
+                    <i class="fa-solid fa-football game-icon"></i>
+                    <div class="game-title">Retro Bowl</div>
+                </div>
+                <div class="game-card" onclick="launchGame('https://slopegame.online')">
+                    <i class="fa-solid fa-circle-dot game-icon"></i>
+                    <div class="game-title">Slope 3D</div>
+                </div>
+                <div class="game-card" onclick="launchGame('https://smashkarts.io')">
+                    <i class="fa-solid fa-car-burst game-icon"></i>
+                    <div class="game-title">Smash Karts</div>
+                </div>
+                <div class="game-card" onclick="launchGame('https://tetris.com')">
+                    <i class="fa-solid fa-cubes game-icon"></i>
+                    <div class="game-title">Tetris Classic</div>
+                </div>
+                <div class="game-card" onclick="launchGame('https://poki.com')">
+                    <i class="fa-solid fa-bolt game-icon"></i>
+                    <div class="game-title">Poki Games Node</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SECRET_PASSWORD = "mahd333"; 
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        if (urlParams.get('code') !== SECRET_PASSWORD) {
+            window.stop();
+            document.documentElement.innerHTML = `
+                <div style="text-align:center; padding-top:100px; background:#111; color:#fff; height:100vh; margin:0; font-family:sans-serif;">
+                    <h1>403 Forbidden</h1>
+                    <p>Access Denied. Please contact your administrator for school assignment permissions.</p>
+                </div>
+            `;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
